@@ -51,6 +51,7 @@ const App: React.FC = () => {
       );
       if (!response.ok) throw new Error("Failed to fetch data from MVG API");
       const data = await response.json();
+      console.log(data.slice(0,3));
       setStations(data.slice(0, 3)); // Get the 3 nearest stations
 
       // Fetch departures for each station
@@ -144,18 +145,22 @@ const App: React.FC = () => {
       {error && <p className="error">{error}</p>}
       {stations.map((station) => (
         <div key={station.globalId} className="station-section">
+        <div className="station-title">
           <h2 className="station-name">{station.name}</h2>
-          <p className="station-services">
-            {station.transportTypes.join(" · ")}
-          </p>
-          <p className="station-distance">{station.distanceInMeters} m</p>
-          <div className="departures">
-            {departures[station.globalId]?.map((departure, index) => (
-              <p key={index} className="departure-info">
-                {departure.label} · {departure.destination} ·{" "}
-                {departure.departureInMinutes} min
-              </p>
-            ))}
+          <div className="station-info">
+             {station.transportTypes.join(" · ")} - {station.distanceInMeters} m
+          </div>  
+        </div>
+        
+        <div className="station-body">
+            <div className="departures">
+              {departures[station.globalId]?.map((departure, index) => (
+                <p key={index} className="departure-info">
+                  {departure.label} · {departure.destination} ·{" "}
+                  {departure.departureInMinutes} min
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       ))}

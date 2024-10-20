@@ -8,8 +8,8 @@ body {
 
 .app {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: 1fr 2fr 1fr;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
   gap: 1px;
   height: 100vh;
   width: 100vw;
@@ -22,35 +22,25 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  position: relative;
-  overflow: hidden;
 }
 
 .station-name {
+  font-size: 4vh;
   font-weight: bold;
   text-transform: uppercase;
   margin: 0;
 }
-
-.station-name-1 {
-  font-size: 48px;
-  align-self: flex-start;
+.station-title, .station-body {
+  text-align: left;
 }
 
-.station-name-2 {
-  font-size: 36px;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  height: calc(100% - 40px);
-}
+.station-section:nth-child(even) .station-title {
+  text-align: right;
+  }
 
-.station-name-3 {
-  font-size: 56px;
-  align-self: flex-end;
-}
+  .station-section:nth-child(odd) .station-body {
+    text-align: right;
+    }
 
 .departures {
   align-self: flex-end;
@@ -59,11 +49,6 @@ body {
 .departure-info {
   font-size: 14px;
   margin: 5px 0;
-  text-align: right;
-}
-
-.station-services, .station-distance {
-  display: none;
 }
 
 .station-1 {
@@ -113,7 +98,7 @@ body {
   .station-3 { grid-row: 5 / 6; }
   .departures-3 { grid-row: 6 / 7; }
 
-  .station-name-2 {
+  .station-title-2 {
     writing-mode: horizontal-tb;
     position: static;
     height: auto;
