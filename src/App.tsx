@@ -45,7 +45,9 @@ const App: React.FC = () => {
   const fetchNearestStations = async (lat: number, lon: number) => {
     try {
       const response = await fetch(
-        `https://www.mvg.de/api/fib/v2/station/nearby?latitude=${lat}&longitude=${lon}`
+        // https://www.mvg.de/api/bgw-pt/v3/routes?originStationGlobalId=de:09162:2&destinationStationGlobalId=de:09162:130&routingDateTime=2024-10-20T14:58:21.014Z&routingDateTimeIsArrival=false&transportTypes=SCHIFF,RUFTAXI,BAHN,UBAHN,TRAM,SBAHN,BUS,REGIONAL_BUS
+//        `https://www.mvg.de/api/fib/v2/station/nearby?latitude=${lat}&longitude=${lon}`
+          `https://www.mvg.de/api/bgw-pt/v3/stations/nearby?latitude=${lat}&longitude=${lon}`
       );
       if (!response.ok) throw new Error("Failed to fetch data from MVG API");
       const data = await response.json();
@@ -95,11 +97,13 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchDepartures = async (stationId: string) => {
+  const fetchDepartures = async (stationId: string, limit: Number = 6  ) => {
     try {
       const response = await fetch(
-        `https://www.mvg.de/api/fib/v2/departure?globalId=${stationId}&limit=5&offsetInMinutes=0`
-      );
+//        `https://www.mvg.de/api/fib/v2/departure?globalId=${stationId}&limit=5&offsetInMinutes=0`
+//`https://www.mvg.de/api/fib/v2/departure?globalId=${stationId}&limit=5&offsetInMinutes=0`
+`https://www.mvg.de/api/bgw-pt/v3/departures?globalId=${stationId}&limit=${limit}&transportTypes=UBAHN,REGIONAL_BUS,BUS,TRAM,SBAHN`
+);
       if (!response.ok)
         throw new Error("Failed to fetch departure data from MVG API");
       const data = await response.json();
