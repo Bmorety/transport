@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import {registerHandlers} from "./scroll.js";
 import "./App.css";
 
 interface StationData {
@@ -15,6 +16,7 @@ interface DepartureData {
   departureInMinutes: number;
 }
 
+let loaded = false;
 const App: React.FC = () => {
   const [stations, setStations] = useState<StationData[]>([]);
   const [departures, setDepartures] = useState<Record<string, DepartureData[]>>(
@@ -22,7 +24,9 @@ const App: React.FC = () => {
   );
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadData = function(){
+    setDepartures({});
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -40,9 +44,18 @@ const App: React.FC = () => {
       // Use a default location (Haidhausplatz) if geolocation is not supported
       fetchNearestStations(48.1351, 11.592);
     }
+  };
+
+  
+  useEffect(() => {
+    if (loaded) return;
+    loaded = true;
+    loadData();
+    registerHandlers(loadData);
   }, []);
 
   const fetchNearestStations = async (lat: number, lon: number) => {
+    let stations : StationData[];
     try {
       const response = await fetch(
         // https://www.mvg.de/api/bgw-pt/v3/routes?originStationGlobalId=de:09162:2&destinationStationGlobalId=de:09162:130&routingDateTime=2024-10-20T14:58:21.014Z&routingDateTimeIsArrival=false&transportTypes=SCHIFF,RUFTAXI,BAHN,UBAHN,TRAM,SBAHN,BUS,REGIONAL_BUS
@@ -51,17 +64,11 @@ const App: React.FC = () => {
       );
       if (!response.ok) throw new Error("Failed to fetch data from MVG API");
       const data = await response.json();
-      console.log(data.slice(0,3));
-      setStations(data.slice(0, 3)); // Get the 3 nearest stations
-
-      // Fetch departures for each station
-      for (const station of data.slice(0, 3)) {
-        await fetchDepartures(station.globalId);
-      }
+      stations = data.slice(0, 3);
     } catch (error) {
       console.error("Error fetching stations:", error);
       // Use mock stations if API call fails
-      const mockStations: StationData[] = [
+      stations = [
         {
           name: "Haidhausen",
           globalId: "de:09162:1785",
@@ -91,11 +98,12 @@ const App: React.FC = () => {
           distanceInMeters: 800,
         },
       ];
-      setStations(mockStations);
-      for (const station of mockStations) {
-        await fetchDepartures(station.globalId);
-      }
     }
+    
+    setStations(stations);
+
+    for(const station of stations)
+      await fetchDepartures(station.globalId);
   };
 
   const fetchDepartures = async (stationId: string, limit: Number = 6  ) => {
@@ -105,8 +113,10 @@ const App: React.FC = () => {
 //`https://www.mvg.de/api/fib/v2/departure?globalId=${stationId}&limit=5&offsetInMinutes=0`
 `https://www.mvg.de/api/bgw-pt/v3/departures?globalId=${stationId}&limit=${limit}&transportTypes=UBAHN,REGIONAL_BUS,BUS,TRAM,SBAHN`
 );
+
       if (!response.ok)
         throw new Error("Failed to fetch departure data from MVG API");
+
       const data = await response.json();
       const now = new Date();
       const departuresWithMinutes = data.map((dep: any) => ({
@@ -143,8 +153,19 @@ const App: React.FC = () => {
   return (
     <div className="app">
       {error && <p className="error">{error}</p>}
-      {stations.map((station) => (
-        <div key={station.globalId} className="station-section">
+      {stations.map((station) => formatStation(station, departures))}
+    </div>
+  );
+};
+
+const formatStation = function (station:StationData, departures:Record<string, DepartureData[]>) {
+  const localDepartures = departures[station.globalId] || [];
+
+  if (! localDepartures.length)
+    return (<div key={station.globalId} className="station-section"></div>);
+
+  return (
+    <div key={station.globalId} className="station-section">
         <div className="station-title">
           <h2 className="station-name">{station.name}</h2>
           <div className="station-info">
@@ -154,7 +175,7 @@ const App: React.FC = () => {
         
         <div className="station-body">
             <div className="departures">
-              {departures[station.globalId]?.map((departure, index) => (
+              {localDepartures.map((departure, index) => (
                 <p key={index} className="departure-info">
                   {departure.label} · {departure.destination} ·{" "}
                   {departure.departureInMinutes} min
@@ -163,9 +184,6 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-      ))}
-    </div>
-  );
-};
-
+  )
+}
 export default App;
