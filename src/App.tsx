@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {registerHandlers} from "./scroll.js";
-import "./App.css";;
+import "./App.css";
 
+const logo = require("./assets/images/logo512.png");
 interface StationData {
   name: string;
   globalId: string;
@@ -152,7 +153,7 @@ const App: React.FC = () => {
 
   return (
     <main>
-    <div><img className="logo" src="transport/assets/images/logo512.png"/></div>
+    <div><img className="logo" src={logo}/></div>
     <div className="app">
       {error && <p className="error">{error}</p>}
       {stations.map((station) => formatStation(station, departures))}
