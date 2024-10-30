@@ -23,6 +23,15 @@ body {
   }
 }
 
+.logo {
+  max-height: 10vh;
+  max-width: 20vw;
+
+  position: absolute;
+  z-index: 100;
+  right: 0;
+}
+
 
 .station-section {
   background-color: white;
