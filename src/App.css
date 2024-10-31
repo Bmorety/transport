@@ -21,7 +21,7 @@ body {
 
 .logo {
   width: 100%;
-  max-width: 300px;
+  max-width: 280px;
   height: auto;
   margin: 0 0 20px;
 }
@@ -35,7 +35,7 @@ body {
 
 .station-section {
   margin-bottom: 20px;
-  opacity: 0.6;
+  opacity: 0.25;
   transition: opacity 0.3s ease;
 }
 
@@ -60,8 +60,8 @@ body {
 }
 
 .station-services {
-  font-size: 14px;
-  margin-top: 5px;
+  font-size: 16px;
+  margin-top: 3px;
 }
 
 .departures {
@@ -92,7 +92,7 @@ body {
   }
 
   .station-services {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .departure-info {
