@@ -1,38 +1,46 @@
+'use client'
+
 import React, { useState, useEffect } from "react";
-import {registerHandlers} from "./scroll.js";
+import { registerHandlers } from "./scroll.js";
 import "./App.css";
+import { fetchNearestStations, fetchDepartures, fetchServices, StationData, DepartureData, StationServiceInfo } from "./MvvApi";
 
-const logo = require("./assets/images/logo512.png");
-interface StationData {
-  name: string;
-  globalId: string;
-  transportTypes: string[];
-  distanceInMeters: number;
-}
 
-interface DepartureData {
-  transportType: string;
-  label: string;
-  destination: string;
-  departureInMinutes: number;
-}
 
 let loaded = false;
+
 const App: React.FC = () => {
   const [stations, setStations] = useState<StationData[]>([]);
-  const [departures, setDepartures] = useState<Record<string, DepartureData[]>>(
-    {}
-  );
+  const [departures, setDepartures] = useState<Record<string, DepartureData[]>>({});
   const [error, setError] = useState<string | null>(null);
+  const [openAccordion, setOpenAccordion] = useState<string | null>(null);
 
-  const loadData = function(){
+  const loadData = function () {
     setDepartures({});
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          await fetchNearestStations(latitude, longitude);
+          const stations = await fetchNearestStations(latitude, longitude);
+
+          setStations(stations);
+          setOpenAccordion(stations[0]?.globalId || null);
+
+
+          for (const station of stations) {
+            station.services = await fetchServices(station);
+            setStations(stations);
+          }
+
+          for (const station of stations) {
+            const departures = await fetchDepartures(station.globalId);
+
+            setDepartures((prev) => ({
+              ...prev,
+              [station.globalId]: departures,
+            }));
+          }
         },
         (error) => {
           setError(getGeolocationErrorMessage(error));
@@ -47,94 +55,12 @@ const App: React.FC = () => {
     }
   };
 
-  
   useEffect(() => {
     if (loaded) return;
     loaded = true;
     loadData();
     registerHandlers(loadData);
   }, []);
-
-  const fetchNearestStations = async (lat: number, lon: number) => {
-    let stations : StationData[];
-    try {
-      const response = await fetch(
-        // https://www.mvg.de/api/bgw-pt/v3/routes?originStationGlobalId=de:09162:2&destinationStationGlobalId=de:09162:130&routingDateTime=2024-10-20T14:58:21.014Z&routingDateTimeIsArrival=false&transportTypes=SCHIFF,RUFTAXI,BAHN,UBAHN,TRAM,SBAHN,BUS,REGIONAL_BUS
-//        `https://www.mvg.de/api/fib/v2/station/nearby?latitude=${lat}&longitude=${lon}`
-          `https://www.mvg.de/api/bgw-pt/v3/stations/nearby?latitude=${lat}&longitude=${lon}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch data from MVG API");
-      const data = await response.json();
-      stations = data.slice(0, 3);
-    } catch (error) {
-      console.error("Error fetching stations:", error);
-      // Use mock stations if API call fails
-      stations = [
-        {
-          name: "Haidhausen",
-          globalId: "de:09162:1785",
-          transportTypes: ["S1", "S2", "S3", "S4", "S6", "S7", "S8"],
-          distanceInMeters: 0,
-        },
-        {
-          name: "Ostbahnhof",
-          globalId: "de:09162:6",
-          transportTypes: [
-            "U5",
-            "S1",
-            "S2",
-            "S3",
-            "S4",
-            "S6",
-            "S7",
-            "S8",
-            "Tram 19",
-          ],
-          distanceInMeters: 500,
-        },
-        {
-          name: "Max-Weber-Platz",
-          globalId: "de:09162:10",
-          transportTypes: ["U4", "U5", "Tram 19"],
-          distanceInMeters: 800,
-        },
-      ];
-    }
-    
-    setStations(stations);
-
-    for(const station of stations)
-      await fetchDepartures(station.globalId);
-  };
-
-  const fetchDepartures = async (stationId: string, limit: Number = 6  ) => {
-    try {
-      const response = await fetch(
-//        `https://www.mvg.de/api/fib/v2/departure?globalId=${stationId}&limit=5&offsetInMinutes=0`
-//`https://www.mvg.de/api/fib/v2/departure?globalId=${stationId}&limit=5&offsetInMinutes=0`
-`https://www.mvg.de/api/bgw-pt/v3/departures?globalId=${stationId}&limit=${limit}&transportTypes=UBAHN,REGIONAL_BUS,BUS,TRAM,SBAHN`
-);
-
-      if (!response.ok)
-        throw new Error("Failed to fetch departure data from MVG API");
-
-      const data = await response.json();
-      const now = new Date();
-      const departuresWithMinutes = data.map((dep: any) => ({
-        ...dep,
-        departureInMinutes: Math.round(
-          (new Date(dep.realtimeDepartureTime).getTime() - now.getTime()) /
-            60000
-        ),
-      }));
-      setDepartures((prev) => ({
-        ...prev,
-        [stationId]: departuresWithMinutes,
-      }));
-    } catch (error) {
-      console.error("Error fetching departures:", error);
-    }
-  };
 
   const getGeolocationErrorMessage = (
     error: GeolocationPositionError
@@ -151,43 +77,51 @@ const App: React.FC = () => {
     }
   };
 
+  const toggleAccordion = (stationId: string) => {
+    setOpenAccordion(openAccordion === stationId ? null : stationId);
+  };
+
+  const calculateWalkingTime = (distanceInMeters: number): number => {
+    return Math.ceil(distanceInMeters / 1.5 / 60);
+  };
+
+  console.log(stations)
+
   return (
-    <main>
-    <div><img className="logo" src={logo}/></div>
-    <div className="app">
+    <main className="app">
+      <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
+      <div className="separator" />
       {error && <p className="error">{error}</p>}
-      {stations.map((station) => formatStation(station, departures))}
-    </div>
+      {stations.map((station, index) => (
+        <div key={station.globalId} className={`station-section ${openAccordion === station.globalId ? 'open' : ''}`}>
+          <div className="station-header" onClick={() => toggleAccordion(station.globalId)}>
+            <h2 className="station-name">{station.name}</h2>
+            <span className="walking-time">{calculateWalkingTime(station.distanceInMeters)} min</span>
+          </div>
+          {station.services && station.services.length > 0 && (
+            <div className="station-services">
+              {station.services?.map(s => s.label).join(' · ')}
+            </div>
+          ) || (
+              <div className="station-service-types">
+                {station.transportTypes.join(' · ')}
+              </div>
+            )
+          }
+          {openAccordion === station.globalId && (
+            <div className="departures">
+              {departures[station.globalId]?.map((departure, index) => (
+                <p key={index} className="departure-info">
+                  {departure.label} · {departure.destination} · {departure.departureInMinutes} min
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+      <div className="separator" />
     </main>
   );
 };
 
-const formatStation = function (station:StationData, departures:Record<string, DepartureData[]>) {
-  const localDepartures = departures[station.globalId] || [];
-
-  if (! localDepartures.length)
-    return (<div key={station.globalId} className="station-section"></div>);
-
-  return (
-    <div key={station.globalId} className="station-section">
-        <div className="station-title">
-          <h2 className="station-name">{station.name}</h2>
-          <div className="station-info">
-             {station.transportTypes.join(" · ")} - {station.distanceInMeters} m
-          </div>  
-        </div>
-        
-        <div className="station-body">
-            <div className="departures">
-              {localDepartures.map((departure, index) => (
-                <p key={index} className="departure-info">
-                  {departure.label} · {departure.destination} ·{" "}
-                  {departure.departureInMinutes} min
-                </p>
-              ))}
-            </div>
-          </div>
-        </div>
-  )
-}
 export default App;
