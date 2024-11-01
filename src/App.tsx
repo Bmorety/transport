@@ -14,9 +14,11 @@ const App: React.FC = () => {
   const [departures, setDepartures] = useState<Record<string, DepartureData[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+  const [updateTime, setUpdateTime] = useState<string>(""); //
 
   const loadData = function () {
     setDepartures({});
+    setUpdateTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -90,6 +92,9 @@ const App: React.FC = () => {
   return (
     <main className="app">
       <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
+      <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
+        Updated: {updateTime}
+      </div>
       <div className="separator" />
       {error && <p className="error">{error}</p>}
       {stations.map((station, index) => (
@@ -120,6 +125,9 @@ const App: React.FC = () => {
         </div>
       ))}
       <div className="separator" />
+      
+      
+    
     </main>
   );
 };

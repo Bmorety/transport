@@ -31,6 +31,7 @@ body {
   height: 1px;
   background-color: black;
   margin: 20px 0;
+  margin-top: 5px;
 }
 
 .station-section {
@@ -66,12 +67,20 @@ body {
 }
 
 .departures {
-  margin-top: 25px;
+  margin-top: 20px;
 }
 
 .departure-info {
   font-size: 16px;
   margin: 5px 0;
+}
+
+.update-time {
+  text-align: right;
+  margin-bottom: 0px;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
 }
 
 .error {
