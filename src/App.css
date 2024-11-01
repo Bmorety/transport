@@ -48,6 +48,7 @@ body {
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+  margin-bottom: 0,25rem; /* line to reduce space */
 }
 
 .station-name {
@@ -61,11 +62,11 @@ body {
 
 .station-services {
   font-size: 16px;
-  margin-top: 3px;
+  margin-top: 0,25rem; /* Add this block to reduce space above services */
 }
 
 .departures {
-  margin-top: 10px;
+  margin-top: 25px;
 }
 
 .departure-info {
