@@ -40,7 +40,7 @@ function isPullDown(dY, dX) {
   // methods of checking slope, length, direction of line created by swipe action
   return (
     dY < 0 &&
-    ((Math.abs(dX) <= 100 && Math.abs(dY) >= 300) ||
+    ((Math.abs(dX) <= 100 && Math.abs(dY) >= 250) ||
       (Math.abs(dX) / Math.abs(dY) <= 0.3 && dY >= 60))
   );
 }
