@@ -33,49 +33,33 @@ export interface StationServiceInfo {
 
 
 export const fetchNearestStations = async (lat: number, lon: number, limit: number = 3) => {
-    let stations: StationData[];
+    const fetchStations = async (latitude: number, longitude: number) => {
+      const response = await fetch(
+        `https://www.mvg.de/api/bgw-pt/v3/stations/nearby?latitude=${latitude}&longitude=${longitude}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch data from MVG API");
+      const data = await response.json();
+      return data.slice(0, limit);
+    };
+  
     try {
-        const response = await fetch(
-            `https://www.mvg.de/api/bgw-pt/v3/stations/nearby?latitude=${lat}&longitude=${lon}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch data from MVG API");
-        const data = await response.json();
-        return data.slice(0, limit);
+      const stations = await fetchStations(lat, lon);
+      if (stations.length > 0) {
+        return stations;
+      } else {
+        // If no stations found, use fixed location (Munich Central Station)
+        const fixedLat = 48.1407;
+        const fixedLon = 11.5583;
+        return await fetchStations(fixedLat, fixedLon);
+      }
     } catch (error) {
-        console.error("Error fetching stations:", error);
-        // Use mock stations if API call fails
-        return [
-            {
-                name: "Haidhausen",
-                globalId: "de:09162:1785",
-                transportTypes: ["S1", "S2", "S3", "S4", "S6", "S7", "S8"],
-                distanceInMeters: 0,
-            },
-            {
-                name: "Ostbahnhof",
-                globalId: "de:09162:6",
-                transportTypes: [
-                    "U5",
-                    "S1",
-                    "S2",
-                    "S3",
-                    "S4",
-                    "S6",
-                    "S7",
-                    "S8",
-                    "Tram 19",
-                ],
-                distanceInMeters: 500,
-            },
-            {
-                name: "Max-Weber-Platz",
-                globalId: "de:09162:10",
-                transportTypes: ["U4", "U5", "Tram 19"],
-                distanceInMeters: 800,
-            },
-        ];
+      console.error("Error fetching stations:", error);
+      // If API call fails, use fixed location (Munich Central Station)
+      const fixedLat = 48.1407;
+      const fixedLon = 11.5583;
+      return await fetchStations(fixedLat, fixedLon);
     }
-}
+  };
 
 export const fetchServices = async (station: StationData): Promise<StationServiceInfo[]> => {
     try {
