@@ -4,7 +4,7 @@ export interface StationData {
     globalId: string;
     transportTypes: string[];
     distanceInMeters: number;
-    services: StationServiceInfo[]|undefined;
+    services: StationServiceInfo[] | undefined;
 }
 
 export enum TransportType {
@@ -34,49 +34,49 @@ export interface StationServiceInfo {
 
 export const fetchNearestStations = async (lat: number, lon: number, limit: number = 3) => {
     const fetchStations = async (latitude: number, longitude: number) => {
-      const response = await fetch(
-        `https://www.mvg.de/api/bgw-pt/v3/stations/nearby?latitude=${latitude}&longitude=${longitude}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch data from MVG API");
-      const data = await response.json();
-      return data.slice(0, limit);
+        const response = await fetch(
+            `https://www.mvg.de/api/bgw-pt/v3/stations/nearby?latitude=${latitude}&longitude=${longitude}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch data from MVG API");
+        const data = await response.json();
+        return data.slice(0, limit);
     };
-  
+
     try {
-      const stations = await fetchStations(lat, lon);
-      if (stations.length > 0) {
-        return stations;
-      } else {
-        // If no stations found, use fixed location (Munich Central Station)
+        const stations = await fetchStations(lat, lon);
+        if (stations.length > 0) {
+            return stations;
+        } else {
+            // If no stations found, use fixed location (Munich Central Station)
+            const fixedLat = 48.1407;
+            const fixedLon = 11.5583;
+            return await fetchStations(fixedLat, fixedLon);
+        }
+    } catch (error) {
+        console.error("Error fetching stations:", error);
+        // If API call fails, use fixed location (Munich Central Station)
         const fixedLat = 48.1407;
         const fixedLon = 11.5583;
         return await fetchStations(fixedLat, fixedLon);
-      }
-    } catch (error) {
-      console.error("Error fetching stations:", error);
-      // If API call fails, use fixed location (Munich Central Station)
-      const fixedLat = 48.1407;
-      const fixedLon = 11.5583;
-      return await fetchStations(fixedLat, fixedLon);
     }
-  };
+};
 
 export const fetchServices = async (station: StationData): Promise<StationServiceInfo[]> => {
     try {
-        
-    const response = await fetch(`https://www.mvg.de/api/bgw-pt/v3/lines/${station.globalId}`);
+
+        const response = await fetch(`https://www.mvg.de/api/bgw-pt/v3/lines/${station.globalId}`);
 
 
-    if (!response.ok)
-        // todo: debug this
+        if (!response.ok)
+            // todo: debug this
+            return [];
+
+
+        const data = await response.json();
+        return data;
+    } catch {
         return [];
-
-
-    const data = await response.json();
-    return data;
-} catch {
-    return [];
-}
+    }
 }
 export const fetchDepartures = async (stationId: string, limit: number = 6) => {
     try {

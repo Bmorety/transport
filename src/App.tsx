@@ -15,6 +15,17 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [updateTime, setUpdateTime] = useState<string>(""); //
+  const [busChecked, setBusChecked] = useState(true)
+  const [tramChecked, setTramChecked] = useState(true)
+  const [ubahnChecked, setUbahnChecked] = useState(true)
+  const [sbahnChecked, setSbahnChecked] = useState(true)
+  const [bahnChecked, setBahnChecked] = useState(false)  // Initially unchecked
+
+  const toggleBusCheck = () => setBusChecked(!busChecked)
+  const toggleTramCheck = () => setTramChecked(!tramChecked)
+  const toggleUbahnCheck = () => setUbahnChecked(!ubahnChecked)
+  const toggleSbahnCheck = () => setSbahnChecked(!sbahnChecked)
+  const toggleBahnCheck = () => setBahnChecked(!bahnChecked)
 
   const loadData = function () {
     setDepartures({});
@@ -92,8 +103,22 @@ const App: React.FC = () => {
   return (
     <main className="app">
       <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
-      <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
-        Updated: {updateTime}
+      <div className="flex flex-row">
+        <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
+          Updated: {updateTime}
+        </div>
+
+        <input type="checkbox" id="BUS" checked={busChecked} onChange={toggleBusCheck} />
+        <span>Bus</span>
+        <input type="checkbox" id="TRAM" checked={tramChecked} onChange={toggleTramCheck} />
+        <span>Tram</span>
+        <input type="checkbox" id="UBAHN" checked={ubahnChecked} onChange={toggleUbahnCheck} />
+        <span>UBahn</span>
+        <input type="checkbox" id="SBAHN" checked={sbahnChecked} onChange={toggleSbahnCheck} />
+        <span>SBahn</span>
+        <input type="checkbox" id="BAHN" checked={bahnChecked} onChange={toggleBahnCheck} />
+        <span>Bahn</span>
+
       </div>
       <div className="separator" />
       {error && <p className="error">{error}</p>}
@@ -107,7 +132,7 @@ const App: React.FC = () => {
             <div className="station-services">
               {station.services?.map(s => s.label).join(' · ')}
             </div>
-          ) || (
+          ) || ( // Esto flashea cuando services no esta ahí o tiene un length de 0
               <div className="station-service-types">
                 {station.transportTypes.join(' · ')}
               </div>
@@ -115,7 +140,18 @@ const App: React.FC = () => {
           }
           {openAccordion === station.globalId && (
             <div className="departures">
-              {departures[station.globalId]?.map((departure, index) => (
+              {departures[station.globalId]?.filter((departure) => {
+                if (
+                  (departure.transportType === 'BUS' && busChecked) ||
+                  (departure.transportType === 'TRAM' && tramChecked) ||
+                  (departure.transportType === 'UBAHN' && ubahnChecked) ||
+                  (departure.transportType === 'SBAHN' && sbahnChecked) ||
+                  (departure.transportType === 'BAHN' && bahnChecked)
+                ) {
+                  return true;
+                }
+                return false;
+              }).map((departure, index) => (
                 <p key={index} className="departure-info">
                   {departure.label} · {departure.destination} · {departure.departureInMinutes} min
                 </p>
@@ -125,9 +161,9 @@ const App: React.FC = () => {
         </div>
       ))}
       <div className="separator" />
-      
-      
-    
+
+
+
     </main>
   );
 };
