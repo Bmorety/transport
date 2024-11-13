@@ -103,7 +103,7 @@ const App: React.FC = () => {
   return (
     <main className="app">
       <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
-      <div className="flex flex-row justify-content-between">
+      <div className="flex flex-row justify-content-between align-item-baseline" style={{ "gap": "1em" }}>
         <div>
           <label>
             <input type="checkbox" id="BUS" checked={busChecked} onChange={toggleBusCheck} />
