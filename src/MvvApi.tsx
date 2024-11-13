@@ -78,7 +78,7 @@ export const fetchServices = async (station: StationData): Promise<StationServic
         return [];
     }
 }
-export const fetchDepartures = async (stationId: string, limit: number = 6) => {
+export const fetchDepartures = async (stationId: string, limit: number = 15) => {
     try {
 
         const response = await fetch(

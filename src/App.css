@@ -49,7 +49,8 @@ body {
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  margin-bottom: 0,25rem; /* line to reduce space */
+  margin-bottom: 0, 25rem;
+  /* line to reduce space */
 }
 
 .station-name {
@@ -63,7 +64,8 @@ body {
 
 .station-services {
   font-size: 16px;
-  margin-top: 0,25rem; /* Add this block to reduce space above services */
+  margin-top: 0, 25rem;
+  /* Add this block to reduce space above services */
 }
 
 .departures {
@@ -76,9 +78,6 @@ body {
 }
 
 .update-time {
-  text-align: right;
-  margin-bottom: 0px;
-  width: 100%;
   cursor: pointer;
   user-select: none;
 }
@@ -86,6 +85,18 @@ body {
 .error {
   color: red;
   text-align: center;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.justify-content-between {
+  justify-content: space-between;
 }
 
 @media (min-width: 768px) {

@@ -103,22 +103,37 @@ const App: React.FC = () => {
   return (
     <main className="app">
       <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
-      <div className="flex flex-row">
+      <div className="flex flex-row justify-content-between">
+        <div>
+          <label>
+            <input type="checkbox" id="BUS" checked={busChecked} onChange={toggleBusCheck} />
+            <span>Bus</span>
+          </label>
+
+          <label>
+            <input type="checkbox" id="TRAM" checked={tramChecked} onChange={toggleTramCheck} />
+            <span>Tram</span>
+          </label>
+
+          <label>
+            <input type="checkbox" id="UBAHN" checked={ubahnChecked} onChange={toggleUbahnCheck} />
+            <span>UBahn</span>
+          </label>
+
+          <label>
+            <input type="checkbox" id="SBAHN" checked={sbahnChecked} onChange={toggleSbahnCheck} />
+            <span>SBahn</span>
+          </label>
+
+          <label>
+            <input type="checkbox" id="BAHN" checked={bahnChecked} onChange={toggleBahnCheck} />
+            <span>Bahn</span>
+          </label>
+        </div>
+
         <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
           Updated: {updateTime}
         </div>
-
-        <input type="checkbox" id="BUS" checked={busChecked} onChange={toggleBusCheck} />
-        <span>Bus</span>
-        <input type="checkbox" id="TRAM" checked={tramChecked} onChange={toggleTramCheck} />
-        <span>Tram</span>
-        <input type="checkbox" id="UBAHN" checked={ubahnChecked} onChange={toggleUbahnCheck} />
-        <span>UBahn</span>
-        <input type="checkbox" id="SBAHN" checked={sbahnChecked} onChange={toggleSbahnCheck} />
-        <span>SBahn</span>
-        <input type="checkbox" id="BAHN" checked={bahnChecked} onChange={toggleBahnCheck} />
-        <span>Bahn</span>
-
       </div>
       <div className="separator" />
       {error && <p className="error">{error}</p>}
@@ -151,7 +166,7 @@ const App: React.FC = () => {
                   return true;
                 }
                 return false;
-              }).map((departure, index) => (
+              }).slice(0, 6).map((departure, index) => (
                 <p key={index} className="departure-info">
                   {departure.label} · {departure.destination} · {departure.departureInMinutes} min
                 </p>
