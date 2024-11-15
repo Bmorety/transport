@@ -6,6 +6,7 @@ import "./App.css";
 import { fetchNearestStations, fetchDepartures, fetchServices, StationData, DepartureData, StationServiceInfo } from "./MvvApi";
 
 let loaded = false;
+let loading = false;
 
 const App: React.FC = () => {
   const [stations, setStations] = useState<StationData[]>([]);
@@ -25,7 +26,7 @@ const App: React.FC = () => {
   const toggleSbahnCheck = () => setSbahnChecked(!sbahnChecked)
   const toggleBahnCheck = () => setBahnChecked(!bahnChecked)
 
-  const loadDepartures = async function () {
+  const loadDepartures = async function (stations: StationData[]) {
     const transportTypes = {
       BUS: busChecked,
       TRAM: tramChecked,
@@ -47,46 +48,49 @@ const App: React.FC = () => {
     setDepartures({});
     setUpdateTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          // fetch nearby stations
-          const { latitude, longitude } = position.coords;
-          const stations = await fetchNearestStations(latitude, longitude);
-
-          setStations(stations);
-          setOpenAccordion(stations[0]?.globalId || null);
-
-          // load service data for them
-          for (const station of stations) {
-            station.services = await fetchServices(station);
-            setStations(stations);
-          }
-
-          // fetch departures for them
-          await loadDepartures();
-        },
-        (error) => {
-          setError(getGeolocationErrorMessage(error));
-          fetchNearestStations(48.1351, 11.592);
-        }
-      );
-    } else {
+    if (!navigator.geolocation) {
       setError("Geolocation is not supported by this browser.");
       fetchNearestStations(48.1351, 11.592);
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        // fetch nearby stations
+        const { latitude, longitude } = position.coords;
+        const stations = await fetchNearestStations(latitude, longitude);
+
+        setStations(stations);
+        setOpenAccordion(stations[0]?.globalId || null);
+
+        // load service data for them
+        for (const station of stations)
+          station.services = await fetchServices(station);
+
+        setStations(stations);
+
+        // fetch departures for them
+        await loadDepartures(stations);
+      },
+      (error) => {
+        setError(getGeolocationErrorMessage(error));
+        fetchNearestStations(48.1351, 11.592);
+      }
+    );
   };
 
+  // on load
   useEffect(() => {
-    if (loaded) return;
-    loaded = true;
-    loadData();
+    if (loading || loaded) return;
+    loading = true;
     registerHandlers(loadData);
+    loadData().then(() => loaded = true);
   }, []);
 
   // Reload data when transport type filters change
   useEffect(function () {
-    loadDepartures()
+    if (!loaded) return;
+    loadDepartures(stations);
   }, [busChecked, tramChecked, ubahnChecked, sbahnChecked, bahnChecked]);
 
   const getGeolocationErrorMessage = (

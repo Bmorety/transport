@@ -90,27 +90,29 @@ export const fetchServices = async (station: StationData): Promise<StationServic
         if (!response.ok)
             return [];
 
-        const data: StationServiceInfo[] = await response.json();
+        let data: StationServiceInfo[] = Array.from(await response.json());
 
         // Filter out BAHN services and organize by transport type
-        const filteredData = Array.from(data.filter(service => service.transportType !== TransportType.BAHN));
+        data = data.filter(service => service.transportType !== TransportType.BAHN)
 
-        // Separate night services (starting with N)
-        const regularServices = filteredData.filter(service => !service.label.startsWith('N'));
-        const nightServices = filteredData.filter(service => service.label.startsWith('N'));
+        // sort regular services by type and night service
+        data.sort((a, b) =>
+            compare(a.label.startsWith('N'), b.label.startsWith('N')) ||
+            compare(Object.keys(TransportType).indexOf(a.transportType), Object.keys(TransportType).indexOf(b.transportType))
+        )
 
-        // sort regular services by type
-        regularServices.sort((a, b) => Object.keys(TransportType).indexOf(a.transportType) - Object.keys(TransportType).indexOf(b.transportType))
-
-        // Combine all services in the desired order
-        return [
-            ...regularServices,
-            ...nightServices
-        ]
+        return data;
     } catch {
         return [];
     }
 }
+
+function compare(a: Number | boolean, b: Number | boolean) {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+}
+
 export const fetchDepartures = async (
     stationId: string,
     transportTypes: { [key: string]: boolean },
