@@ -84,6 +84,7 @@ export const searchStations = async (query: string): Promise<StationData[]> => {
     }
 }
 
+const transportOrder = Object.keys(TransportType);
 export const fetchServices = async (station: StationData): Promise<StationServiceInfo[]> => {
     try {
         const response = await fetch(`https://www.mvg.de/api/bgw-pt/v3/lines/${station.globalId}`);
@@ -98,7 +99,7 @@ export const fetchServices = async (station: StationData): Promise<StationServic
         // sort regular services by type and night service
         data.sort((a, b) =>
             compare(a.label.startsWith('N'), b.label.startsWith('N')) ||
-            compare(Object.keys(TransportType).indexOf(a.transportType), Object.keys(TransportType).indexOf(b.transportType))
+            compare(transportOrder.indexOf(a.transportType), transportOrder.indexOf(b.transportType))
         )
 
         return data;
