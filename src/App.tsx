@@ -5,8 +5,6 @@ import { registerHandlers } from "./scroll.js";
 import "./App.css";
 import { fetchNearestStations, fetchDepartures, fetchServices, StationData, DepartureData, StationServiceInfo } from "./MvvApi";
 
-
-
 let loaded = false;
 
 const App: React.FC = () => {
@@ -27,43 +25,54 @@ const App: React.FC = () => {
   const toggleSbahnCheck = () => setSbahnChecked(!sbahnChecked)
   const toggleBahnCheck = () => setBahnChecked(!bahnChecked)
 
-  const loadData = function () {
+  const loadDepartures = async function () {
+    const transportTypes = {
+      BUS: busChecked,
+      TRAM: tramChecked,
+      UBAHN: ubahnChecked,
+      SBAHN: sbahnChecked,
+      BAHN: bahnChecked
+    };
+
+    for (const station of stations) {
+      const departures = await fetchDepartures(station.globalId, transportTypes);
+      setDepartures((prev) => ({
+        ...prev,
+        [station.globalId]: departures,
+      }));
+    }
+  }
+
+  const loadData = async function () {
     setDepartures({});
     setUpdateTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
+          // fetch nearby stations
           const { latitude, longitude } = position.coords;
           const stations = await fetchNearestStations(latitude, longitude);
 
           setStations(stations);
           setOpenAccordion(stations[0]?.globalId || null);
 
-
+          // load service data for them
           for (const station of stations) {
             station.services = await fetchServices(station);
             setStations(stations);
           }
 
-          for (const station of stations) {
-            const departures = await fetchDepartures(station.globalId);
-
-            setDepartures((prev) => ({
-              ...prev,
-              [station.globalId]: departures,
-            }));
-          }
+          // fetch departures for them
+          await loadDepartures();
         },
         (error) => {
           setError(getGeolocationErrorMessage(error));
-          // Use a default location (Haidhausplatz) if geolocation fails
           fetchNearestStations(48.1351, 11.592);
         }
       );
     } else {
       setError("Geolocation is not supported by this browser.");
-      // Use a default location (Haidhausplatz) if geolocation is not supported
       fetchNearestStations(48.1351, 11.592);
     }
   };
@@ -74,6 +83,11 @@ const App: React.FC = () => {
     loadData();
     registerHandlers(loadData);
   }, []);
+
+  // Reload data when transport type filters change
+  useEffect(function () {
+    loadDepartures()
+  }, [busChecked, tramChecked, ubahnChecked, sbahnChecked, bahnChecked]);
 
   const getGeolocationErrorMessage = (
     error: GeolocationPositionError
@@ -97,8 +111,6 @@ const App: React.FC = () => {
   const calculateWalkingTime = (distanceInMeters: number): number => {
     return Math.ceil(distanceInMeters / 1.5 / 60);
   };
-
-  console.log(stations)
 
   return (
     <main className="app">
@@ -137,36 +149,24 @@ const App: React.FC = () => {
       </div>
       <div className="separator" />
       {error && <p className="error">{error}</p>}
-      {stations.map((station, index) => (
+      {stations.map((station) => (
         <div key={station.globalId} className={`station-section ${openAccordion === station.globalId ? 'open' : ''}`}>
           <div className="station-header" onClick={() => toggleAccordion(station.globalId)}>
             <h2 className="station-name">{station.name}</h2>
             <span className="walking-time">{calculateWalkingTime(station.distanceInMeters)} min</span>
           </div>
-          {station.services && station.services.length > 0 && (
-            <div className="station-services">
-              {station.services?.map(s => s.label).join(' · ')}
-            </div>
-          ) || ( // Esto flashea cuando services no esta ahí o tiene un length de 0
-              <div className="station-service-types">
-                {station.transportTypes.join(' · ')}
-              </div>
-            )
-          }
+          <div className="station-services">
+            {station.services ? (
+              <>
+                {station.services.map(s => s.label).join(' · ')}
+              </>
+            ) : (
+              station.transportTypes.join(' · ')
+            )}
+          </div>
           {openAccordion === station.globalId && (
             <div className="departures">
-              {departures[station.globalId]?.filter((departure) => {
-                if (
-                  (departure.transportType === 'BUS' && busChecked) ||
-                  (departure.transportType === 'TRAM' && tramChecked) ||
-                  (departure.transportType === 'UBAHN' && ubahnChecked) ||
-                  (departure.transportType === 'SBAHN' && sbahnChecked) ||
-                  (departure.transportType === 'BAHN' && bahnChecked)
-                ) {
-                  return true;
-                }
-                return false;
-              }).slice(0, 6).map((departure, index) => (
+              {departures[station.globalId]?.map((departure, index) => (
                 <p key={index} className="departure-info">
                   {departure.label} · {departure.destination} · {departure.departureInMinutes} min
                 </p>
@@ -176,9 +176,6 @@ const App: React.FC = () => {
         </div>
       ))}
       <div className="separator" />
-
-
-
     </main>
   );
 };
