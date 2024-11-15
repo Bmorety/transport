@@ -179,7 +179,7 @@ const App: React.FC = () => {
             <div className="departures">
               {departures[station.globalId]?.map((departure, index) => (
                 <p key={index} className="departure-info">
-                  {departure.label} · {departure.destination} · {departure.departureInMinutes} min
+                  {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
                 </p>
               ))}
             </div>

@@ -137,10 +137,7 @@ export const fetchDepartures = async (
         const departuresWithMinutes = data
             .map((dep: any) => ({
                 ...dep,
-                departureInMinutes: Math.round(
-                    (new Date(dep.realtimeDepartureTime).getTime() - now.getTime()) /
-                    60000
-                ),
+                departureInMinutes: timestampToRelative(dep.realtimeDepartureTime, now),
             }))
             .slice(0, 6); // Limit to 6 results at API level
         return departuresWithMinutes;
@@ -149,3 +146,10 @@ export const fetchDepartures = async (
         return [];
     }
 };
+function timestampToRelative(timestamp: string, now: Date) {
+    return Math.round(
+        (new Date(timestamp).getTime() - now.getTime()) /
+        60000
+    );
+}
+
