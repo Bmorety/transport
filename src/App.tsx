@@ -155,8 +155,7 @@ const App: React.FC = () => {
 
         <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
           {updateTime}
-          &nbsp;
-          <FontAwesomeIcon icon={faSync} />
+          <FontAwesomeIcon icon={faSync} style={{ paddingLeft: ".4em" }} />
         </div>
       </div>
       <div className="separator" />
