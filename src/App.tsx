@@ -4,6 +4,12 @@ import React, { useState, useEffect } from "react";
 import { registerHandlers } from "./scroll.js";
 import "./App.css";
 import { fetchNearestStations, fetchDepartures, fetchServices, StationData, DepartureData, StationServiceInfo } from "./MvvApi";
+import { config } from '@fortawesome/fontawesome-svg-core'
+import '@fortawesome/fontawesome-svg-core/styles.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faRedo, faSync } from '@fortawesome/free-solid-svg-icons'
+
+config.autoAddCss = false;
 
 let loaded = false;
 let loading = false;
@@ -148,7 +154,9 @@ const App: React.FC = () => {
         </div>
 
         <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
-          Updated: {updateTime}
+          {updateTime}
+          &nbsp;
+          <FontAwesomeIcon icon={faSync} />
         </div>
       </div>
       <div className="separator" />
