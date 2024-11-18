@@ -8,6 +8,10 @@ import { config } from '@fortawesome/fontawesome-svg-core'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRedo, faSync } from '@fortawesome/free-solid-svg-icons'
+import { faPersonWalking } from '@fortawesome/free-solid-svg-icons'
+
+
+
 
 config.autoAddCss = false;
 
@@ -126,31 +130,42 @@ const App: React.FC = () => {
     <main className="app">
       <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
       <div className="flex flex-row justify-content-between align-item-baseline" style={{ "gap": "1em" }}>
-        <div>
-          <label>
-            <input type="checkbox" id="BUS" checked={busChecked} onChange={toggleBusCheck} />
-            <span>Bus</span>
-          </label>
-
-          <label>
-            <input type="checkbox" id="TRAM" checked={tramChecked} onChange={toggleTramCheck} />
-            <span>Tram</span>
-          </label>
-
-          <label>
-            <input type="checkbox" id="UBAHN" checked={ubahnChecked} onChange={toggleUbahnCheck} />
-            <span>UBahn</span>
-          </label>
-
-          <label>
-            <input type="checkbox" id="SBAHN" checked={sbahnChecked} onChange={toggleSbahnCheck} />
-            <span>SBahn</span>
-          </label>
-
-          <label>
-            <input type="checkbox" id="BAHN" checked={bahnChecked} onChange={toggleBahnCheck} />
-            <span>Bahn</span>
-          </label>
+        <div className="transport-button-container">
+          <button
+            onClick={toggleBusCheck}
+            className={`transport-button ${busChecked ? 'active' : ''}`}
+            aria-pressed={busChecked}
+          >
+            Bus
+          </button>
+          <button
+            onClick={toggleTramCheck}
+            className={`transport-button ${tramChecked ? 'active' : ''}`}
+            aria-pressed={tramChecked}
+          >
+            Tram
+          </button>
+          <button
+            onClick={toggleUbahnCheck}
+            className={`transport-button ${ubahnChecked ? 'active' : ''}`}
+            aria-pressed={ubahnChecked}
+          >
+            UBahn
+          </button>
+          <button
+            onClick={toggleSbahnCheck}
+            className={`transport-button ${sbahnChecked ? 'active' : ''}`}
+            aria-pressed={sbahnChecked}
+          >
+            SBahn
+          </button>
+          <button
+            onClick={toggleBahnCheck}
+            className={`transport-button ${bahnChecked ? 'active' : ''}`}
+            aria-pressed={bahnChecked}
+          >
+            Bahn
+          </button>
         </div>
 
         <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
@@ -163,8 +178,13 @@ const App: React.FC = () => {
       {stations.map((station) => (
         <div key={station.globalId} className={`station-section ${openAccordion === station.globalId ? 'open' : ''}`}>
           <div className="station-header" onClick={() => toggleAccordion(station.globalId)}>
-            <h2 className="station-name">{station.name}</h2>
-            <span className="walking-time">{calculateWalkingTime(station.distanceInMeters)} min</span>
+            <h2 className="station-name flex items-center">
+              {station.name}
+              <span className="ml-4 text-xs text-muted-foreground flex items-center">
+                <FontAwesomeIcon icon={faPersonWalking} className="mr-2 h-3 w-3" style={{ paddingLeft: ".4em" }} />
+                {calculateWalkingTime(station.distanceInMeters)} min
+              </span>
+            </h2>
           </div>
           <div className="station-services">
             {station.services ? (

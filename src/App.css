@@ -34,6 +34,37 @@ body {
   margin-top: 5px;
 }
 
+.transport-button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+  /* This adds space between the buttons */
+}
+
+.transport-button {
+  padding: 0.5rem 1rem;
+  font-family: 'Bebas Neue', sans-serif;
+  /* Match the font with the rest of the app */
+  border: none;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  background-color: #adaeaf;
+  color: white;
+
+}
+
+.transport-button.active {
+  background-color: black;
+  color: white;
+}
+
+.transport-button:hover {
+  opacity: 0.9;
+}
+
+
 .station-section {
   margin-bottom: 20px;
   opacity: 0.25;
