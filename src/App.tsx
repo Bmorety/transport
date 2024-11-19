@@ -196,12 +196,23 @@ const App: React.FC = () => {
             )}
           </div>
           {openAccordion === station.globalId && (
-            <div className="departures">
-              {departures[station.globalId]?.map((departure, index) => (
-                <p key={index} className="departure-info">
-                  {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
-                </p>
-              ))}
+            <div className="departures-container">
+              <div className="departures">
+                {departures[station.globalId]?.slice(0, 6).map((departure, index) => (
+                  <p key={index} className="departure-info">
+                    {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
+                  </p>
+                ))}
+              </div>
+              {departures[station.globalId] && departures[station.globalId].length > 6 && (
+                <div className="departures departures-extended">
+                  {departures[station.globalId]?.slice(6).map((departure, index) => (
+                    <p key={index + 6} className="departure-info">
+                      {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

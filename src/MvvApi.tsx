@@ -117,7 +117,7 @@ function compare(a: Number | boolean, b: Number | boolean) {
 export const fetchDepartures = async (
     stationId: string,
     transportTypes: { [key: string]: boolean },
-    limit: number = 6
+    limit: number = 11
 ) => {
     try {
         const enabledTypes = Object.entries(transportTypes)
@@ -139,7 +139,7 @@ export const fetchDepartures = async (
                 ...dep,
                 departureInMinutes: timestampToRelative(dep.realtimeDepartureTime, now),
             }))
-            .slice(0, 6); // Limit to 6 results at API level
+            .slice(0, 11); // Limit to 6 results at API level
         return departuresWithMinutes;
     } catch (error) {
         console.error("Error fetching departures:", error);

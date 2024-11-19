@@ -42,7 +42,7 @@ body {
 }
 
 .transport-button {
-  padding: 0.5rem 1rem;
+  padding: 0.35rem 0.9rem;
   font-family: 'Bebas Neue', sans-serif;
   /* Match the font with the rest of the app */
   border: none;
@@ -99,9 +99,7 @@ body {
   /* Add this block to reduce space above services */
 }
 
-.departures {
-  margin-top: 20px;
-}
+
 
 .departure-info {
   font-size: 16px;
@@ -136,6 +134,41 @@ body {
 
 label:has(input[type='checkbox']) {
   white-space: nowrap;
+}
+
+.departures-container {
+  margin-top: 20px;
+  max-height: calc(6 * (1.2em + 8px));
+  /* Increased line-height and margin */
+  overflow-y: auto;
+}
+
+.departures {
+  margin-top: 10px;
+}
+
+.departures-extended {
+  margin-top: 0px;
+  padding-top: 0px;
+  /* border-top: 1px solid rgba(0, 0, 0, 0.1); */
+}
+
+/* Add a subtle scrollbar style */
+.departures-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.departures-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.departures-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.departures-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 @media (min-width: 768px) {
