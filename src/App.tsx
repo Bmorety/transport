@@ -11,8 +11,6 @@ import { faRedo, faSync } from '@fortawesome/free-solid-svg-icons'
 import { faPersonWalking } from '@fortawesome/free-solid-svg-icons'
 
 
-
-
 config.autoAddCss = false;
 
 let loaded = false;
@@ -127,98 +125,103 @@ const App: React.FC = () => {
   };
 
   return (
-    <main className="app">
-      <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
-      <div className="flex flex-row justify-content-between align-item-baseline" style={{ "gap": "1em" }}>
-        <div className="transport-button-container">
-          <button
-            onClick={toggleBusCheck}
-            className={`transport-button ${busChecked ? 'active' : ''}`}
-            aria-pressed={busChecked}
-          >
-            Bus
-          </button>
-          <button
-            onClick={toggleTramCheck}
-            className={`transport-button ${tramChecked ? 'active' : ''}`}
-            aria-pressed={tramChecked}
-          >
-            Tram
-          </button>
-          <button
-            onClick={toggleUbahnCheck}
-            className={`transport-button ${ubahnChecked ? 'active' : ''}`}
-            aria-pressed={ubahnChecked}
-          >
-            UBahn
-          </button>
-          <button
-            onClick={toggleSbahnCheck}
-            className={`transport-button ${sbahnChecked ? 'active' : ''}`}
-            aria-pressed={sbahnChecked}
-          >
-            SBahn
-          </button>
-          <button
-            onClick={toggleBahnCheck}
-            className={`transport-button ${bahnChecked ? 'active' : ''}`}
-            aria-pressed={bahnChecked}
-          >
-            Bahn
-          </button>
-        </div>
+    <div className="app-container ">
+      <header className="app-header">
+        <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
+        <div className="separator" />
+      </header>
+      <main className="app-main">
+        <div className="flex flex-row justify-content-between align-item-baseline" style={{ "gap": "1em" }}>
+          <div className="transport-button-container">
+            <button
+              onClick={toggleBusCheck}
+              className={`transport-button ${busChecked ? 'active' : ''}`}
+              aria-pressed={busChecked}
+            >
+              Bus
+            </button>
+            <button
+              onClick={toggleTramCheck}
+              className={`transport-button ${tramChecked ? 'active' : ''}`}
+              aria-pressed={tramChecked}
+            >
+              Tram
+            </button>
+            <button
+              onClick={toggleUbahnCheck}
+              className={`transport-button ${ubahnChecked ? 'active' : ''}`}
+              aria-pressed={ubahnChecked}
+            >
+              UBahn
+            </button>
+            <button
+              onClick={toggleSbahnCheck}
+              className={`transport-button ${sbahnChecked ? 'active' : ''}`}
+              aria-pressed={sbahnChecked}
+            >
+              SBahn
+            </button>
+            <button
+              onClick={toggleBahnCheck}
+              className={`transport-button ${bahnChecked ? 'active' : ''}`}
+              aria-pressed={bahnChecked}
+            >
+              Bahn
+            </button>
+          </div>
 
-        <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
-          {updateTime}
-          <FontAwesomeIcon icon={faSync} style={{ paddingLeft: ".4em" }} />
+          <div className="update-time" onClick={loadData} role="button" tabIndex={0}>
+            {updateTime}
+            <FontAwesomeIcon icon={faSync} style={{ paddingLeft: ".4em" }} />
+          </div>
         </div>
-      </div>
-      <div className="separator" />
-      {error && <p className="error">{error}</p>}
-      {stations.map((station) => (
-        <div key={station.globalId} className={`station-section ${openAccordion === station.globalId ? 'open' : ''}`}>
-          <div className="station-header" onClick={() => toggleAccordion(station.globalId)}>
-            <h2 className="station-name flex items-center">
-              {station.name}
-              <span className="ml-4 text-xs text-muted-foreground flex items-center">
-                <FontAwesomeIcon icon={faPersonWalking} className="mr-2 h-3 w-3" style={{ paddingLeft: ".4em" }} />
-                {calculateWalkingTime(station.distanceInMeters)} min
-              </span>
-            </h2>
-          </div>
-          <div className="station-services">
-            {station.services ? (
-              <>
-                {station.services.map(s => s.label).join(' · ')}
-              </>
-            ) : (
-              station.transportTypes.join(' · ')
-            )}
-          </div>
-          {openAccordion === station.globalId && (
-            <div className="departures-container">
-              <div className="departures">
-                {departures[station.globalId]?.slice(0, 6).map((departure, index) => (
-                  <p key={index} className="departure-info">
-                    {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
-                  </p>
-                ))}
-              </div>
-              {departures[station.globalId] && departures[station.globalId].length > 6 && (
-                <div className="departures departures-extended">
-                  {departures[station.globalId]?.slice(6).map((departure, index) => (
-                    <p key={index + 6} className="departure-info">
+        <div className="separator" />
+        {error && <p className="error">{error}</p>}
+        {stations.map((station) => (
+          <div key={station.globalId} className={`station-section ${openAccordion === station.globalId ? 'open' : ''}`}>
+            <div className="station-header" onClick={() => toggleAccordion(station.globalId)}>
+              <h2 className="station-name flex items-center">
+                {station.name}
+                <span className="ml-4 text-xs text-muted-foreground flex items-center">
+                  <FontAwesomeIcon icon={faPersonWalking} className="mr-2 h-3 w-3" style={{ paddingLeft: ".4em" }} />
+                  {calculateWalkingTime(station.distanceInMeters)} min
+                </span>
+              </h2>
+            </div>
+            <div className="station-services">
+              {station.services ? (
+                <>
+                  {station.services.map(s => s.label).join(' · ')}
+                </>
+              ) : (
+                station.transportTypes.join(' · ')
+              )}
+            </div>
+            {openAccordion === station.globalId && (
+              <div className="departures-container">
+                <div className="departures">
+                  {departures[station.globalId]?.slice(0, 6).map((departure, index) => (
+                    <p key={index} className="departure-info">
                       {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
                     </p>
                   ))}
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
-      <div className="separator" />
-    </main>
+                {departures[station.globalId] && departures[station.globalId].length > 6 && (
+                  <div className="departures departures-extended">
+                    {departures[station.globalId]?.slice(6).map((departure, index) => (
+                      <p key={index + 6} className="departure-info">
+                        {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+        <div className="separator" />
+      </main>
+    </div>
   );
 };
 
