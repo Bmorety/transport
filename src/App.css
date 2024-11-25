@@ -6,37 +6,34 @@ body {
   font-family: 'Bebas Neue', sans-serif;
   background-color: white;
   color: black;
+  overflow-x: hidden;
 }
 
-app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+.app-container {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: 5px;
-  box-sizing: border-box;
+  padding: 0 0.8rem;
 }
 
 .app-header {
-  width: 100%;
-  max-width: 600px;
   max-height: 20vh;
-  margin: 0 auto;
+
   display: flex;
   flex-direction: column;
   align-items: left;
+  overflow: hidden;
+
+  margin: 5px 0;
 }
 
+
 .app-main {
-  width: 100%;
-  max-width: 600px;
-  min-height: 80vh;
-  margin: 0 auto;
+  min-height: 100hv;
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 
@@ -44,9 +41,6 @@ app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
   padding: 5px;
   box-sizing: border-box;
 }
@@ -55,7 +49,8 @@ app-container {
   width: 100%;
   max-width: 280px;
   height: auto;
-  margin: 5px 0;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .separator {
@@ -63,7 +58,6 @@ app-container {
   height: 1px;
   background-color: rgb(0, 0, 0);
   margin: 7px 0;
-
 }
 
 .transport-button-container {
@@ -169,7 +163,7 @@ label:has(input[type='checkbox']) {
 
 .departures-container {
   margin-top: 20px;
-  max-height: calc(6 * (1.2em + 8px));
+  max-height: calc(6 * (1.2em + 6px));
   /* Increased line-height and margin */
   overflow-y: auto;
 }
@@ -202,9 +196,57 @@ label:has(input[type='checkbox']) {
   background: #555;
 }
 
+.kofi-button {
+  position: absolute;
+  margin-top: 10px;
+  display: flex;
+  right: 0.5rem;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  color: black;
+}
+
+.coffee-icon {
+  margin-left: 8px;
+}
+
+.show-kofi {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.kofi-container {
+  width: 100%;
+  max-width: 600px;
+
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.kofi-text {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.app-footer {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  flex-shrink: 0;
+}
+
 @media (min-width: 768px) {
   .app-container {
-    padding: 40px;
+    padding: 20px;
   }
 
   .station-name {
@@ -222,4 +264,17 @@ label:has(input[type='checkbox']) {
   .departure-info {
     font-size: 18px;
   }
+}
+
+
+.text-xs {
+  font-size: 60%;
+}
+
+.text-s {
+  font-size: 75%;
+}
+
+.text-sm {
+  font-size: 85%;
 }
