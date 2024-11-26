@@ -5,6 +5,8 @@ export interface StationData {
     transportTypes: string[];
     distanceInMeters: number;
     services: StationServiceInfo[];
+    latitude: number;
+    longitude: number;
 }
 
 export enum TransportType {
@@ -64,20 +66,31 @@ export const fetchNearestStations = async (lat: number, lon: number, limit: numb
     }
 };
 
-export const searchStations = async (query: string): Promise<StationData[]> => {
+export const searchStations = async (query: string, location: Coordinates | null = null): Promise<StationData[]> => {
     try {
-        const response = await fetch(`https://www.mvg.de/api/bgw-pt/v3/stations?query=${encodeURIComponent(query)}`);
+        const response = await fetch(`https://www.mvg.de/api/bgw-pt/v3/locations?query=${encodeURIComponent(query)}`);
         if (!response.ok) {
             throw new Error("Failed to fetch stations");
         }
-        const data = await response.json();
-        return data.map((station: any) => ({
-            name: station.name,
-            globalId: station.globalId,
-            transportTypes: station.transportTypes,
-            distanceInMeters: station.distanceInMeters || 0,
-            services: undefined
+
+        const locations = await response.json();
+        let stations = locations.filter((loc: any) => loc["type"] === "STATION");
+        if (!stations)
+            return [];
+
+        // transform data 
+        stations = stations.map((station: any) => ({
+            ...station,
+            distanceInMeters: station.distanceInMeters || location === null ? 0 : haversineDistance(station, location),
+            services: undefined,
         }));
+
+        // sort by geo distance
+        stations.sort((a: StationData, b: StationData) => compare(a.distanceInMeters, b.distanceInMeters));
+
+
+
+        return stations;
     } catch (error) {
         console.error("Error searching stations:", error);
         return [];
@@ -153,3 +166,45 @@ function timestampToRelative(timestamp: string, now: Date) {
     );
 }
 
+
+export const getGeolocationErrorMessage = (
+    error: GeolocationPositionError
+): string => {
+    switch (error.code) {
+        case error.PERMISSION_DENIED:
+            return "User denied the request for Geolocation.";
+        case error.POSITION_UNAVAILABLE:
+            return "Location information is unavailable.";
+        case error.TIMEOUT:
+            return "The request to get user location timed out.";
+        default:
+            return "An unknown error occurred.";
+    }
+};
+
+export interface Coordinates {
+    latitude: number;
+    longitude: number;
+}
+
+export function haversineDistance(coord1: Coordinates, coord2: Coordinates) {
+
+    const R = 6371000; // Earth's radius in meters
+    const toRadians = (degrees: number) => degrees * (Math.PI / 180);
+
+    const lat1 = toRadians(coord1.latitude);
+    const lon1 = toRadians(coord1.longitude);
+    const lat2 = toRadians(coord2.latitude);
+    const lon2 = toRadians(coord2.longitude);
+
+    const deltaLat = lat2 - lat1;
+    const deltaLon = lon2 - lon1;
+
+    const a = Math.sin(deltaLat / 2) ** 2 +
+        Math.cos(lat1) * Math.cos(lat2) *
+        Math.sin(deltaLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+}

@@ -125,12 +125,6 @@ body {
   /* Add this block to reduce space above services */
 }
 
-
-.departure-info {
-  font-size: 16px;
-  margin: 5px 0;
-}
-
 .update-time {
   cursor: pointer;
   user-select: none;
@@ -161,15 +155,29 @@ label:has(input[type='checkbox']) {
   white-space: nowrap;
 }
 
-.departures-container {
-  margin-top: 20px;
-  max-height: calc(6 * (1.2em + 6px));
-  /* Increased line-height and margin */
-  overflow-y: auto;
+.search-input {
+  border: none;
+  border-bottom: 1px solid black;
+  font-family: 'Bebas Neue', sans-serif;
 }
 
 .departures {
   margin-top: 10px;
+}
+
+.departures-container {
+  margin-top: 2px;
+  max-height: calc(6 * (1.2em + 3px));
+  overflow-y: auto;
+}
+
+.departure-info {
+  font-size: 16px;
+  margin: 0;
+}
+
+.departure-info:not(:last-child) {
+  margin-bottom: 2px;
 }
 
 .departures-extended {
@@ -197,17 +205,16 @@ label:has(input[type='checkbox']) {
 }
 
 .kofi-button {
-  position: absolute;
-  margin-top: 10px;
-  display: flex;
-  right: 0.5rem;
-  align-items: center;
-  background: none;
   border: none;
+  background: none;
+  margin: 0;
+  padding: 0;
   cursor: pointer;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 16px;
   color: black;
+  text-align: right;
+  display: block;
 }
 
 .coffee-icon {
@@ -264,6 +271,10 @@ label:has(input[type='checkbox']) {
   .departure-info {
     font-size: 18px;
   }
+
+  .departures-container {
+    max-height: calc(6 * (1.2em + 5px));
+  }
 }
 
 
@@ -277,4 +288,32 @@ label:has(input[type='checkbox']) {
 
 .text-sm {
   font-size: 85%;
+}
+
+.position-relative {
+  position: relative;
+  width: 100%;
+  height: 0;
+}
+
+.float-end {
+  position: relative;
+  float: right;
+}
+
+.cursor-click,
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.ml-1 {
+  margin-left: 1em;
+}
+
+.ml-2 {
+  margin-left: 2em;
+}
+
+.ml-5 {
+  margin-left: 5em;
 }

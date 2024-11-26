@@ -5,7 +5,7 @@ import "./App.css";
 import { fetchNearestStations, fetchDepartures, fetchServices, StationData, DepartureData, StationServiceInfo } from "./MvvApi";
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRedo, faSync, faPersonWalking, faCoffee } from '@fortawesome/free-solid-svg-icons'
+import { faRedo, faSync, faPersonWalking, faCoffee, faWindowClose } from '@fortawesome/free-solid-svg-icons'
 import { Departures } from "./Departures";
 
 const App: React.FC = () => {
@@ -16,11 +16,11 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <header className="app-header">
-        <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
-        <button onClick={toggleKofi} className="kofi-button">
+        <a onClick={toggleKofi} className="kofi-button">
           A Project by Critical Mass Works
-          <FontAwesomeIcon icon={faCoffee} className="coffee-icon" />
-        </button>
+          <FontAwesomeIcon icon={showKofi ? faWindowClose : faCoffee} className="coffee-icon" fixedWidth />
+        </a>
+        <img src="/transport/images/Logo512.png" alt="PVBLIC." className="logo" />
         <div className="separator" />
       </header>
       <main className={`app-main ${showKofi ? 'show-kofi' : ''}`}>
@@ -47,7 +47,6 @@ const App: React.FC = () => {
             />
           </div>
         ) : (
-
           <Departures></Departures>
         )}
 
