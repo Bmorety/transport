@@ -29,13 +29,13 @@ const App: React.FC = () => {
             <div className="kofi-text">
               <h2>Support PVBLIC</h2>
               <p>
-                Hi, I’m Bruno, and I’m working on PVBLIC, a project to reimagine the public transport experience. Combining design with simplicity, PVBLIC creates seamless functionality while integrating a community feedback layer. Users share their thoughts about the city, which AI transforms into insights for planners, businesses, and location-based stories that enrich urban experiences.
+                Hi, I’m Bruno, and I am working on PVBLIC, a fresh take on the public transport app. Designed for power users, PVBLIC focuses on the essentials while tapping into the collective knowledge of Urbanauts to capture the pulse of urban life. By gathering and synthesizing what people share, PVBLIC creates short AI-generated narratives that entertain users during their journeys while also offering actionable insights for planners and businesses.
               </p>
               <p>
-                PVBLIC is part of Critical Mass Works, my initiative to promote micro and mass urban mobility through community-driven projects. By fostering grassroots engagement, I aim to create more sustainable, livable, and inclusive cities.
+                PVBLIC is part of Critical Mass Works, a platform dedicated to grassroots community projects, leveraging collective knowledge with digital tools to create solutions for more sustainable, equitable, and inclusive cities.
               </p>
               <p>
-                If you believe in the power of design, community, and innovation to shape better cities, I’d love your support. Your contribution helps me continue building tools like PVBLIC and driving forward the mission of Critical Mass Works.
+                Are you an Urbanaut, ready to share your unique insights about your city? If you believe in the power of collective wisdom to improve urban life, your support can make a meaningful difference. Contributions will help drive the continued development of tools like PVBLIC and support the mission of Critical Mass Works.
               </p>
             </div>
             <iframe
