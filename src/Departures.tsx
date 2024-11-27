@@ -12,7 +12,7 @@ let loading = false;
 
 export const Departures: React.FC = () => {
     const [stations, setStations] = useState<StationData[]>([]);
-    const [manualStation, setManualStation] = useState<StationData | null>(null);
+    const [pinnedStation, setPinnedStation] = useState<StationData | null>(null);
     const [geoPosition, setGeoPosition] = useState<Coordinates>({ latitude: 48.1351, longitude: 11.592 });
 
     const [departures, setDepartures] = useState<Record<string, DepartureData[]>>({});
@@ -54,6 +54,17 @@ export const Departures: React.FC = () => {
         }
     }
 
+
+    const getStationList = () => {
+        if (!pinnedStation)
+            return stations;
+
+        const list = [pinnedStation, ...stations.filter((s: StationData) => s.globalId != pinnedStation.globalId)];
+
+        // check if already in results
+        return list.slice(0, 3);
+    };
+
     const getGeoPosition = (): Promise<Coordinates | null> => {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
@@ -85,13 +96,13 @@ export const Departures: React.FC = () => {
             // update state
             setGeoPosition(coords);
 
-        // fetch nearby stations
+        // fetch nearby stations (removing the pinned station to prevent duplicates)
         const { latitude, longitude } = coords || geoPosition;
-        const stations = await fetchNearestStations(latitude, longitude);
+        let stations = await fetchNearestStations(latitude, longitude);
 
         setStations(stations);
 
-        if (openAccordion !== manualStation?.globalId)
+        if (openAccordion !== pinnedStation?.globalId)
             setOpenAccordion(stations[0]?.globalId || null);
 
         // load service data for them
@@ -103,8 +114,8 @@ export const Departures: React.FC = () => {
         // fetch departures for them
         await loadDepartures(stations);
 
-        if (manualStation)
-            await loadDepartures([manualStation]);
+        if (pinnedStation)
+            await loadDepartures([pinnedStation]);
 
         // finished loading
         loading = false;
@@ -122,16 +133,14 @@ export const Departures: React.FC = () => {
     useEffect(function () {
         if (!loaded) return;
         loadDepartures(stations);
-        if (manualStation)
-            loadDepartures([manualStation])
+
+        if (pinnedStation)
+            loadDepartures([pinnedStation])
+
     }, [busChecked, tramChecked, ubahnChecked, sbahnChecked, bahnChecked]);
 
     const toggleAccordion = (stationId: string) => {
         setOpenAccordion(openAccordion === stationId ? null : stationId);
-    };
-
-    const toggleSearch = async () => {
-        setSearchOpen(!searchOpen);
     };
 
     useEffect(() => inputRef.current?.focus(), [searchOpen]);
@@ -151,13 +160,8 @@ export const Departures: React.FC = () => {
         setSearchOpen(false);
         setOpenAccordion(station.globalId);
 
-        // check if already in results
-        for (const s of stations)
-            if (s.globalId == station.globalId)
-                return;
-
         // add to list
-        setManualStation(station);
+        setPinnedStation(station);
 
         // load missing data
         const transportTypes = {
@@ -175,10 +179,6 @@ export const Departures: React.FC = () => {
             [station.globalId]: departures,
         }));
     }
-
-    const stationList = manualStation
-        ? [manualStation, ...stations]
-        : stations;
 
     return <>
         <div className="flex flex-row justify-content-between align-item-baseline" style={{ "gap": "1em" }}>
@@ -229,7 +229,7 @@ export const Departures: React.FC = () => {
         <div className="separator" />
         {error && <p className="error">{error}</p>}
         <div className="position-relative" title="Search">
-            <FontAwesomeIcon icon={faMagnifyingGlass} className="float-end cursor-click" onClick={toggleSearch} fixedWidth />
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="float-end cursor-click" onClick={() => setSearchOpen(!searchOpen)} fixedWidth />
         </div>
         {searchOpen ? <>
             <input ref={inputRef} className="search-input" placeholder="Search for a station" onChange={searchStation}></input>
@@ -238,7 +238,7 @@ export const Departures: React.FC = () => {
                 : searchResults ?
                     <> Select
                         {searchResults.map(
-                            (station: StationData) => <div className="cursor-click ml-1" onClick={() => handleSearchResultClick(station)}>
+                            (station: StationData) => <div key={station.globalId} className="cursor-click ml-1" onClick={() => handleSearchResultClick(station)}>
                                 {station.name}
                             </div>
                         )}
@@ -249,41 +249,38 @@ export const Departures: React.FC = () => {
         </>
             : <></>
         }
-        {stationList
-            ? stationList.map((station) => (
-                <div key={station.globalId} className={`station-section ${openAccordion === station.globalId ? 'open' : ''}`}>
-                    <div className="station-header" onClick={() => toggleAccordion(station.globalId)}>
-                        <h2 className="station-name flex items-center">
-                            {station.name}
-                            <span className="ml-4 text-muted-foreground text-s">
-                                <FontAwesomeIcon icon={faPersonWalking} style={{ paddingLeft: ".4em" }} />
-                                {calculateWalkingTime(station.distanceInMeters)} min
-                            </span>
-                        </h2>
-                    </div>
-                    <div className="station-services">
-                        {station.services ? (
-                            <>
-                                {station.services.map(s => s.label).join(' · ')}
-                            </>
-                        ) : (
-                            station.transportTypes.join(' · ')
-                        )}
-                    </div>
-                    {openAccordion === station.globalId && (
-                        <div className="departures-container">
-                            <div className="departures">
-                                {departures[station.globalId]?.map((departure, index) => (
-                                    <p key={index} className="departure-info">
-                                        {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
-                                    </p>
-                                ))}
-                            </div>
-                        </div>
+        {getStationList().map((station) => (
+            <div key={station.globalId} className={`station-section ${openAccordion === station.globalId ? 'open' : ''}`}>
+                <div className="station-header" onClick={() => toggleAccordion(station.globalId)}>
+                    <h2 className="station-name flex items-center">
+                        {station.name}
+                        <span className="ml-4 text-muted-foreground text-s">
+                            <FontAwesomeIcon icon={faPersonWalking} style={{ paddingLeft: ".4em" }} />
+                            {calculateWalkingTime(station.distanceInMeters)} min
+                        </span>
+                    </h2>
+                </div>
+                <div className="station-services">
+                    {station.services ? (
+                        <>
+                            {station.services.map(s => s.label).join(' · ')}
+                        </>
+                    ) : (
+                        station.transportTypes.join(' · ')
                     )}
                 </div>
-            ))
-            : <>Loading</>
-        }
+                {openAccordion === station.globalId && (
+                    <div className="departures-container">
+                        <div className="departures">
+                            {departures[station.globalId]?.map((departure, index) => (
+                                <p key={station.globalId + "_" + index} className="departure-info">
+                                    {departure.label} · {departure.destination} · {departure.departureInMinutes < 1 ? (<>Now!</>) : (<>{departure.departureInMinutes} min</>)}
+                                </p>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        ))}
     </>
 }

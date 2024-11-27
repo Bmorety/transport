@@ -1,12 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
+:root {
+  --font: 'Bebas Neue', sans-serif;
+}
+
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font);
   background-color: white;
   color: black;
   overflow-x: hidden;
+}
+
+button,
+input[type="text"],
+input[type="button"] {
+  font-family: var(--font);
 }
 
 .app-container {
@@ -22,7 +32,7 @@ body {
 }
 
 .app-header {
-  max-height: 20vh;
+  max-height: 25vh;
 
   display: flex;
   flex-direction: column;
@@ -163,7 +173,7 @@ label:has(input[type='checkbox']) {
 .search-input {
   border: none;
   border-bottom: 1px solid black;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font);
 }
 
 .departures {
@@ -213,9 +223,8 @@ label:has(input[type='checkbox']) {
   border: none;
   background: none;
   margin: 0;
-  padding: 0;
+  padding-top: 12px;
   cursor: pointer;
-  font-family: 'Bebas Neue', sans-serif;
   font-size: 16px;
   color: black;
   text-align: right;
