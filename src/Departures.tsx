@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { fetchNearestStations, fetchDepartures, fetchServices, StationData, DepartureData, getGeolocationErrorMessage, searchStations, Coordinates, haversineDistance } from "./MvvApi";
 import { registerHandlers } from "./scroll.js";
 import '@fortawesome/fontawesome-svg-core/styles.css'
@@ -6,9 +6,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSync, faPersonWalking, faMagnifyingGlass, faTimes } from '@fortawesome/free-solid-svg-icons'
 
 
-let loaded = false;
 let loading = false;
+const debounce = (fn: any, delay: number) => {
+    let timeout: NodeJS.Timeout | null = null;
+    return (...args: any[]) => {
+        if (timeout !== null) {
+            clearTimeout(timeout);
+            timeout = null;
+        }
 
+        timeout = setTimeout(fn, delay, ...args);
+    };
+};
 
 export const Departures: React.FC = () => {
     const [stations, setStations] = useState<StationData[]>([]);
@@ -123,15 +132,14 @@ export const Departures: React.FC = () => {
 
     // on load
     useEffect(() => {
-        if (loading || loaded) return;
+        if (loading) return;
 
         registerHandlers(loadData);
-        loadData().then(() => loaded = true);
+        loadData()
     }, []);
 
     // Reload data when transport type filters change
     useEffect(function () {
-        if (!loaded) return;
         loadDepartures(stations);
 
         if (pinnedStation)
@@ -149,11 +157,16 @@ export const Departures: React.FC = () => {
         return Math.ceil(distanceInMeters / 1.5 / 60);
     };
 
-    const searchStation = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const query = event.target.value;
-        const results = await searchStations(query, geoPosition);
+    const searchDebounce = useMemo(
+        () => debounce((query: string) => {
+            searchStations(query, geoPosition).then(results => setSearchResults(results.slice(0, 6)));
+        }, 300),
+        []);
 
-        setSearchResults(results.slice(0, 6));
+
+    const searchStation = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const query = event.target.value;
+        searchDebounce(query);
     };
 
     const handleSearchResultClick = async (station: StationData) => {
