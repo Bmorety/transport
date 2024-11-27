@@ -37,33 +37,21 @@ export interface StationServiceInfo {
 }
 
 
-export const fetchNearestStations = async (lat: number, lon: number, limit: number = 3) => {
-    const fetchStations = async (latitude: number, longitude: number) => {
-        const response = await fetch(
-            `https://www.mvg.de/api/bgw-pt/v3/stations/nearby?latitude=${latitude}&longitude=${longitude}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch data from MVG API");
-        const data = await response.json();
-        return data.slice(0, limit);
-    };
+export const fetchNearestStations = async (latitude: number, longitude: number, limit: number = 3) => {
+    const response = await fetch(
+        `https://www.mvg.de/api/bgw-pt/v3/stations/nearby?latitude=${latitude}&longitude=${longitude}`
+    );
+    if (!response.ok)
+        throw new Error("Failed to fetch data from MVG API");
 
-    try {
-        const stations = await fetchStations(lat, lon);
-        if (stations.length > 0) {
-            return stations;
-        } else {
-            // If no stations found, use fixed location (Munich Central Station)
-            const fixedLat = 48.1407;
-            const fixedLon = 11.5583;
-            return await fetchStations(fixedLat, fixedLon);
-        }
-    } catch (error) {
-        console.error("Error fetching stations:", error);
-        // If API call fails, use fixed location (Munich Central Station)
-        const fixedLat = 48.1407;
-        const fixedLon = 11.5583;
-        return await fetchStations(fixedLat, fixedLon);
-    }
+    const data = await response.json();
+    return data
+        .slice(0, limit)
+        .map((station: any) => ({
+            distanceInMeters: haversineDistance(station, { latitude: latitude, longitude: longitude }),
+            ...station,
+            services: undefined,
+        }));
 };
 
 export const searchStations = async (query: string, location: Coordinates | null = null): Promise<StationData[]> => {
@@ -72,9 +60,8 @@ export const searchStations = async (query: string, location: Coordinates | null
             return [];
 
         const response = await fetch(`https://www.mvg.de/api/bgw-pt/v3/locations?query=${encodeURIComponent(query)}`);
-        if (!response.ok) {
+        if (!response.ok)
             throw new Error("Failed to fetch stations");
-        }
 
         const locations = await response.json();
         let stations = locations.filter((loc: any) => loc["type"] === "STATION");
@@ -84,14 +71,12 @@ export const searchStations = async (query: string, location: Coordinates | null
         // transform data 
         stations = stations.map((station: any) => ({
             ...station,
-            distanceInMeters: station.distanceInMeters || location === null ? 0 : haversineDistance(station, location),
+            distanceInMeters: location === null ? 0 : haversineDistance(station, location),
             services: undefined,
         }));
 
         // sort by geo distance
         stations.sort((a: StationData, b: StationData) => compare(a.distanceInMeters, b.distanceInMeters));
-
-
 
         return stations;
     } catch (error) {
@@ -149,14 +134,8 @@ export const fetchDepartures = async (
             throw new Error("Failed to fetch departure data from MVG API");
 
         const data = await response.json();
-        const now = new Date();
-        const departuresWithMinutes = data
-            .map((dep: any) => ({
-                ...dep,
-                departureInMinutes: timestampToRelative(dep.realtimeDepartureTime, now),
-            }))
-            .slice(0, 11); // Limit to 6 results at API level
-        return departuresWithMinutes;
+        return data
+            .slice(0, 12);
     } catch (error) {
         console.error("Error fetching departures:", error);
         return [];

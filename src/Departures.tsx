@@ -7,6 +7,8 @@ import { faSync, faPersonWalking, faMagnifyingGlass, faTimes } from '@fortawesom
 
 
 let loading = false;
+const DEFAULT_COORDINATES = { latitude: 48.1351, longitude: 11.592 };
+
 const debounce = (fn: any, delay: number) => {
     let timeout: NodeJS.Timeout | null = null;
     return (...args: any[]) => {
@@ -22,13 +24,13 @@ const debounce = (fn: any, delay: number) => {
 export const Departures: React.FC = () => {
     const [stations, setStations] = useState<StationData[]>([]);
     const [pinnedStation, setPinnedStation] = useState<StationData | null>(null);
-    const [geoPosition, setGeoPosition] = useState<Coordinates>({ latitude: 48.1351, longitude: 11.592 });
+    const [geoPosition, setGeoPosition] = useState<Coordinates>(DEFAULT_COORDINATES);
 
     const [departures, setDepartures] = useState<Record<string, DepartureData[]>>({});
     const [error, setError] = useState<string | null>(null);
     const [searchOpen, setSearchOpen] = useState<boolean>(false);
     const [searchResults, setSearchResults] = useState<StationData[] | null>(null);
-    const [openAccordion, setOpenAccordion] = useState<string | null>(null);
+    const [expandedStationId, setExpandedStationId] = useState<string | null>(null);
     const [updateTime, setUpdateTime] = useState<string>(""); //
     const [busChecked, setBusChecked] = useState(true)
     const [tramChecked, setTramChecked] = useState(true)
@@ -55,7 +57,7 @@ export const Departures: React.FC = () => {
         };
 
         for (const station of stations) {
-            const departures = await fetchDepartures(station.globalId, transportTypes);
+            const departures = (await fetchDepartures(station.globalId, transportTypes))
             setDepartures((prev) => ({
                 ...prev,
                 [station.globalId]: departures,
@@ -96,23 +98,26 @@ export const Departures: React.FC = () => {
             return;
         loading = true;
 
-        setDepartures({});
+        //        setDepartures({});
         setUpdateTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
 
+        // get current position
         const coords = await getGeoPosition();
 
         if (coords)
-            // update state
             setGeoPosition(coords);
 
         // fetch nearby stations (removing the pinned station to prevent duplicates)
         const { latitude, longitude } = coords || geoPosition;
         let stations = await fetchNearestStations(latitude, longitude);
+        if (!stations.length)
+            stations = await fetchNearestStations(DEFAULT_COORDINATES.latitude, DEFAULT_COORDINATES.longitude);
 
         setStations(stations);
 
-        if (openAccordion !== pinnedStation?.globalId)
-            setOpenAccordion(stations[0]?.globalId || null);
+        // reset expanded station if it is no longer in the result set
+        if (!expandedStationId || !getStationList().filter((s: StationData) => s.globalId == expandedStationId).length)
+            setExpandedStationId(stations[0]?.globalId || null);
 
         // load service data for them
         for (const station of stations)
@@ -123,8 +128,10 @@ export const Departures: React.FC = () => {
         // fetch departures for them
         await loadDepartures(stations);
 
-        if (pinnedStation)
+        if (pinnedStation) {
+            pinnedStation.distanceInMeters = haversineDistance(pinnedStation, geoPosition);
             await loadDepartures([pinnedStation]);
+        }
 
         // finished loading
         loading = false;
@@ -148,7 +155,7 @@ export const Departures: React.FC = () => {
     }, [busChecked, tramChecked, ubahnChecked, sbahnChecked, bahnChecked]);
 
     const toggleAccordion = (stationId: string) => {
-        setOpenAccordion(openAccordion === stationId ? null : stationId);
+        setExpandedStationId(expandedStationId === stationId ? null : stationId);
     };
 
     useEffect(() => inputRef.current?.focus(), [searchOpen]);
@@ -161,8 +168,7 @@ export const Departures: React.FC = () => {
         () => debounce((query: string) => {
             searchStations(query, geoPosition).then(results => setSearchResults(results.slice(0, 6)));
         }, 300),
-        []);
-
+        [geoPosition]);
 
     const searchStation = (event: React.ChangeEvent<HTMLInputElement>) => {
         const query = event.target.value;
@@ -171,7 +177,7 @@ export const Departures: React.FC = () => {
 
     const handleSearchResultClick = async (station: StationData) => {
         setSearchOpen(false);
-        setOpenAccordion(station.globalId);
+        setExpandedStationId(station.globalId);
 
         // add to list
         setPinnedStation(station);
@@ -263,7 +269,7 @@ export const Departures: React.FC = () => {
             : <></>
         }
         {getStationList().map((station) => (
-            <div key={station.globalId} className={`station-section ${openAccordion === station.globalId ? 'open' : ''}`}>
+            <div key={station.globalId} className={`station-section ${expandedStationId === station.globalId ? 'open' : ''}`}>
                 <div className="station-header" onClick={() => toggleAccordion(station.globalId)}>
                     <h2 className="station-name flex items-center">
                         {station.name}
@@ -282,7 +288,7 @@ export const Departures: React.FC = () => {
                         station.transportTypes.join(' · ')
                     )}
                 </div>
-                {openAccordion === station.globalId && (
+                {expandedStationId === station.globalId && (
                     <div className="departures-container">
                         <div className="departures">
                             {departures[station.globalId]?.map((departure, index) => (
