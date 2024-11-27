@@ -59,7 +59,7 @@ export const searchStations = async (query: string, location: Coordinates | null
         if (!query)
             return [];
 
-        const response = await fetch(`https://www.mvg.de/api/bgw-pt/v3/locations?query=${encodeURIComponent(query)}`);
+        const response = await fetch(`https://www.mvg.de/api/bgw-pt/v3/locations?query=${encodeURIComponent(query.toLowerCase())}`);
         if (!response.ok)
             throw new Error("Failed to fetch stations");
 
