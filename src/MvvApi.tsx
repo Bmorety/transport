@@ -134,8 +134,14 @@ export const fetchDepartures = async (
             throw new Error("Failed to fetch departure data from MVG API");
 
         const data = await response.json();
+        const now = new Date();
+
         return data
-            .slice(0, 12);
+            .slice(0, 12)
+            .map((dep: any) => ({
+                ...dep,
+                departureInMinutes: timestampToRelative(dep.realtimeDepartureTime, now),
+            }));
     } catch (error) {
         console.error("Error fetching departures:", error);
         return [];
