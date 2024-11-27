@@ -32,8 +32,6 @@ input[type="button"] {
 }
 
 .app-header {
-  max-height: 25vh;
-
   display: flex;
   flex-direction: column;
   align-items: left;
@@ -63,7 +61,7 @@ input[type="button"] {
 .logo {
   width: 100%;
   max-width: 280px;
-  height: auto;
+  height: fit-content;
   margin-top: 20px;
   margin-bottom: 10px;
 }
@@ -79,13 +77,10 @@ input[type="button"] {
   display: flex;
   flex-wrap: wrap;
   gap: 0.1rem;
-  /* This adds space between the buttons */
 }
 
 .transport-button {
-  padding: 0.35rem 0.9rem;
-  font-family: 'Bebas Neue', sans-serif;
-  /* Match the font with the rest of the app */
+  padding: 0.35rem 0.6rem;
   border: none;
   border-radius: 0.25rem;
   font-weight: bold;
@@ -182,7 +177,7 @@ label:has(input[type='checkbox']) {
 
 .departures-container {
   margin-top: 2px;
-  max-height: calc(6 * (1.2em + 3px));
+  max-height: calc(6 * (18px + 1.5px + 1px + 2px));
   overflow-y: auto;
 }
 
@@ -287,7 +282,11 @@ label:has(input[type='checkbox']) {
   }
 
   .departures-container {
-    max-height: calc(6 * (1.2em + 5px));
+    max-height: calc(6 * (18px + 3.5px + 1px + 2px));
+  }
+
+  .transport-button {
+    padding: 0.35rem 0.9rem;
   }
 }
 
